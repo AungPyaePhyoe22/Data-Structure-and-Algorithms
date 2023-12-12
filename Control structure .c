@@ -1,4 +1,4 @@
-//
+//This is simple double triangle shape!!
 // Created by user on 12/5/2023.
 //
 #include<stdio.h>
