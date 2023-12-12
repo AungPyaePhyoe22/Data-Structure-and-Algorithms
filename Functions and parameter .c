@@ -1,4 +1,4 @@
-//
+// This is simple calculator program!!
 // Created by user on 12/12/2023.
 //
 #include<stdio.h>
