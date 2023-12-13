@@ -1,4 +1,5 @@
 //This is more advanced calculator program!!
+//This calculator calculates(add sub multiply divide) the two numbers then allow the user to calculate more with the result.
 // Created by user on 12/12/2023.
 //
 #include<stdio.h>
