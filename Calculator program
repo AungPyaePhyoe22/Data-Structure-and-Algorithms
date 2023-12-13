@@ -1,5 +1,7 @@
 //
 // Created by user on 12/12/2023.
+//This calculator calculates(add sub multiply divide) the two numbers then allow the user to calculate more with the result.
+//This calculator also shows the history.
 //
 #include<stdio.h>
 int adding(int a , int b);
