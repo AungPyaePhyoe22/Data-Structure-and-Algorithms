@@ -3,13 +3,14 @@
 //
 #include"stdio.h"
 #include"stdlib.h"
+#include "time.h"
 struct trans{
     char tran_record[200];
 };
 typedef struct{
     char c_feed_back[500];
-    char complains[500];
-}feedback;
+    char a_feed_back[500];
+}interact;
 typedef struct{
     char reasons_delete[500];
     int word_counter;
@@ -20,9 +21,11 @@ typedef struct{
     char u_name[30];
     char u_password[30];
     char u_email[30];
+    unsigned long long int u_phone;
     unsigned int u_point;
+    int u_massage;
     struct trans records[100];
-    feedback reviews[50];
+    interact texts[50];
 
 }data;
 struct format{
@@ -30,6 +33,12 @@ struct format{
     char mail_format[20];
 
 };
+struct my_time{
+    char c_time[25];
+
+};
+
+struct my_time Ctime[1];
 data db[10];
 struct format fm[5];
 delete d_accounts[100];
@@ -44,30 +53,33 @@ int tran_record_array[10] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 int review_counter[10] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 char nothing[100];
 
-void declaration();
-void login();
-void registration();
-void my_privilege();
-int compare_two_char_array(char origin_data[30] , char test_data[30]);
-void copy_two_char_array(char first[30] , char second[30]);
-int size_of_array(char test_array[30]);
-int gmail_checking(char test_gmail[30]);
-int password_checking(char test_password[30]);
-int gmail_validation(char valid_gmail[30]);
-int strong_password(char test_password[30]);
-void transfer_money();
-void admin_pov();
-void record_data();
-void loading_data();
-void print_data();
-void transaction_recording (int sender_id,int receiver_id,unsigned int amount);
-void integer_to_char(unsigned int value);
-int charCounting(char toCount[50]);
-void t_record_counting();
-void review_record_counting();
-void admin_functions(int admin_id);
-void ID_arrangement(int d_user_id);
-void Sorting_Deleting(int d_user_id);
+void declaration(); //1
+void login();//1
+void registration();//4
+void my_privilege();//5
+int compare_two_char_array(char origin_data[30] , char test_data[30]);//3
+void copy_two_char_array(char first[30] , char second[30]);//3
+int size_of_array(char test_array[30]);//3
+int gmail_checking(char test_gmail[30]);//2
+int password_checking(char test_password[30]);//2
+int gmail_validation(char valid_gmail[30]);//2
+int strong_password(char test_password[30]);//2
+void transfer_money();//5
+void admin_pov();//5
+void record_data();//4
+void loading_data();//4
+void print_data();//4
+void transaction_recording (int sender_id,int receiver_id,unsigned int amount);//5
+void integer_to_char(unsigned int value);//3
+int charCounting(char toCount[50]);//3
+void t_record_counting();//3
+void review_record_counting();//3
+void admin_functions(int admin_id);//5
+void ID_arrangement(int d_user_id);//5
+void Sorting_Deleting(int d_user_id);//5
+void get_time();//3
+int Counting(unsigned long long int Count);//3
+int phone_validation(unsigned long long int Ph);//2
 int main(){
     t_record_counting();
     review_record_counting();
@@ -147,10 +159,26 @@ void login(){
         printf("Login Success!\nYou are an admin %d\n",l_checking);
         admin_functions(l_checking);
     }else{
-        printf("Login Success!\n");
+        if(db[l_checking].u_massage == 0) {
+            printf("Login Success!\n");
 //        db[l_checking].u_id = l_checking + 1;
-        printf("Welcome %s. This is your id %d\n",db[l_checking].u_name,db[l_checking].u_id);
-        my_privilege();
+            printf("Welcome %s. This is your id %d\n", db[l_checking].u_name, db[l_checking].u_id);
+            my_privilege();
+        }else{
+            int choice = 0;
+            printf("Login failed\nYour account has been suspended for the following reason\n");
+            printf("%s\n",db[l_checking].texts[(db[l_checking].u_massage)-1].c_feed_back);
+            while(choice == 0) {
+                printf("Press 1 to go back to declaration\n");
+                scanf("%d", &choice);
+                if (choice == 1) {
+                    declaration();
+                } else {
+                    printf("Wrong option\n");
+                    choice = 0;
+                }
+            }
+        }
     }
 
 }
@@ -189,6 +217,7 @@ void registration(){
 
     int g_check = 0;
     int p_check = 0;
+    int phone_check = -1;
     if(user_count == 10){
         printf("limit reached!\nYou can't register anymore!!");
     }else {
@@ -219,8 +248,21 @@ void registration(){
         printf("Enter your name:");
         scanf(" %[^\n]", r_name);
         copy_two_char_array(db[user_count].u_name, r_name);
+        while(phone_check == -1) {
+            printf("Enter your phone number:");
+            scanf("%llu", &db[user_count].u_phone);
+            int index = phone_validation(db[user_count].u_phone);
+            if(index > -1){
+                printf("Your phone number is already taken\n");
+            }else{
+                phone_check = 0;
+                printf("Success\n");
+            }
+        }
+
         printf("Registration success!\nYou have obtained 500 points!\n");
         db[user_count].u_point = 500;
+        db[user_count].u_massage = 0;
         db[user_count].u_id = user_count + 1;
         printf("This is your id %d\n",db[user_count].u_id);
         user_count++;
@@ -359,12 +401,12 @@ void my_privilege(){
 }
 int gmail_checking(char test_gmail[30]){
 //phyoe@gmail.com
-    int count = 0;
+    int g_count = 0;
     for(int i =0; i<30; i++){
         if(test_gmail[i] == '@'){
             break;
         }
-        count++;
+        g_count++;
     }
 //    printf("Count %d\n",count);
     for(int i = 0; i<user_count; i++){
@@ -377,14 +419,14 @@ int gmail_checking(char test_gmail[30]){
             o_count++;
         }
 //        printf("O Count %d\n",o_count);
-        if(o_count == count){
-            for(int s =0; s<count; s++){
+        if(o_count == g_count){
+            for(int s =0; s<g_count; s++){
                 if(db[i].u_email[s] == test_gmail[s]){
                     s_count++;
                 }
             }
 //            printf("S Count %d\n",s_count);
-            if(s_count == count){
+            if(s_count == g_count){
                 return i;
             }
         }
@@ -589,7 +631,7 @@ void admin_pov(){
 
     printf("This is admin pov!\n");
     for (int i = 0; i<user_count; i++){
-        printf("This is point for %s : %d\n",db[i].u_name,db[i].u_point);
+        printf("This is point for %s(user id %d) : %d\n",db[i].u_name,db[i].u_id,db[i].u_point);
     }
 
 }
@@ -605,7 +647,7 @@ void record_data(){
     }
     for(int i = 0; i<user_count ; i++){
 
-        fprintf(fptr,"%d%c%s%c%s%c%s%c%d",db[i].u_id,' ',db[i].u_email,' ',db[i].u_password,' ',db[i].u_name,' ',db[i].u_point);
+        fprintf(fptr,"%d%c%s%c%s%c%s%c%llu%c%d%c%d",db[i].u_id,' ',db[i].u_email,' ',db[i].u_password,' ',db[i].u_name,' ',db[i].u_phone,' ',db[i].u_point,' ',db[i].u_massage);
 
 //        printf("%d%s%s%s%d",db[i].u_id,db[i].u_email,db[i].u_password,db[i].u_name,db[i].u_point);
 //            for (int z = 0; z <=tran_record_array[i]; z++)
@@ -662,7 +704,7 @@ void loading_data(){
     int s = 0;
     for( s = 0; s<10; s++ ){
 //        printf("\n%d\n",s);
-        fscanf(fptr, "%d%s%s%s%d", &db[s].u_id,&db[s].u_email[0],&db[s].u_password[0],&db[s].u_name[0],&db[s].u_point);
+        fscanf(fptr, "%d%s%s%s%llu%d%d", &db[s].u_id,&db[s].u_email[0],&db[s].u_password[0],&db[s].u_name[0],&db[s].u_phone,&db[s].u_point,&db[s].u_massage);
 
         for (int z = 0; z <=tran_record_array[s]; z++) {
 
@@ -698,7 +740,12 @@ void loading_data(){
 void print_data(){
     printf("\nUsers: %d\n",user_count);
     for(int i = 0; i<user_count;i++){
-        printf("%d%c%s%c%s%c%s%c%d%c",db[i].u_id,'-',db[i].u_email,'-',db[i].u_password,'-',db[i].u_name,'-',db[i].u_point,'\n');
+        printf("%d%c%s%c%s%c%s%c%llu%c%d%c%d%c",db[i].u_id,'-',db[i].u_email,'-',db[i].u_password,'-',db[i].u_name,'-',db[i].u_phone,'-',db[i].u_point,'-',db[i].u_massage,'\n');
+        for (int z = 0; z <=tran_record_array[i]; z++) {
+
+            printf( "User %d - %s\n",i+1 , db[i].records[z].tran_record);
+        }
+
     }
         for(int s = 0 ; s<=review_no ; s++) {
 //            printf("C\n");
@@ -748,6 +795,13 @@ void transaction_recording (int sender_id,int receiver_id,unsigned int amount){
     }
     for(int i = 0; i<amount_counter ; i++){
         db[sender_id].records[count].tran_record[i_count] = int_to_char_array_data[i];
+        i_count++;
+    }
+    db[sender_id].records[count].tran_record[i_count] = '$';
+    i_count++;
+    get_time();
+    for(int s = 0 ; s < 25 ; s++){
+        db[sender_id].records[count].tran_record[i_count] = Ctime[0].c_time[s];
         i_count++;
     }
     db[sender_id].records[count].tran_record[i_count] = '*';
@@ -821,15 +875,74 @@ void review_record_counting(){
 void admin_functions(int admin_id) {
     int opt = -1;
     printf("Welcome from admin functions!\n");
+    if(db[admin_id].u_massage>0) {
+        printf("You have got %d massages!\n", db[admin_id].u_massage);
+    }
+
     while (opt == -1) {
-    printf("Press 0 to get out!\nPress 1 to go to user options!\n");
+    printf("Press 0 to get out!\nPress 1 to suspend and control users!\nPress 2 to view your massages\n");
     scanf("%d", &opt);
     if (opt == 0) {
-        declaration();
         l_checking = -1;
+        declaration();
     }else if(opt == 1){
-        my_privilege();
-    } else {
+        int number = -1;
+        int choice = -1;
+//        char test[10] = {'D','e','a','r',' ','u','s','e','r','-'};
+        printf("This is users manipulation sector\n");
+        printf("These are users' data\n");
+        admin_pov();
+        while(choice == -1) {
+            printf("Press 0 to suspend users!\n");
+            scanf("%d", &choice);
+            if (choice == 0) {
+                printf("Choose the id number of the user you want to suspend - ");
+                scanf("%d", &number);
+                printf("Enter your reasons of suspend\n");
+                scanf(" %[^\n]", db[number - 1].texts[(db[number - 1].u_massage)].c_feed_back);
+                db[number - 1].u_massage++;
+            } else {
+                printf("Wrong option!\n");
+                choice = -1;
+            }
+        }
+
+        int choice1 = 0;
+        while (choice1 != 1){
+            printf("Click 1 to go  back :");
+            scanf("%d", &choice1);
+            if (choice1 == 1) {
+                admin_functions(admin_id);
+            } else {
+                printf("Try again!\n");
+            }
+        }
+
+    }else if(opt == 2) {
+
+        if (db[admin_id].u_massage == 0) {
+            printf("You have no massage\n");
+        } else {
+        int point = (review_no + 1) - db[admin_id].u_massage;
+        printf("%d users have deactivated their accounts for following reasons!\n", db[admin_id].u_massage);
+        for (int s = point; s <= review_no; s++) {
+            printf("%s", d_accounts[s].reasons_delete);
+        }
+            db[admin_id].u_massage = 0;
+    }
+
+        int choice = 0;
+        while (choice != 1){
+            printf("Click 1 to go  back :");
+            scanf("%d", &choice);
+            if (choice == 1) {
+                admin_functions(admin_id);
+            } else {
+                printf("Try again!\n");
+            }
+        }
+    }else {
+        printf("Wrong option\n");
         opt = -1;
     }
     }
@@ -852,6 +965,7 @@ void Sorting_Deleting(int d_user_id){
         for(int j = 0 ; j<30 ; j++){
             db[i-1].u_name[j] = db[i].u_name[j];
         }
+        db[i-1].u_phone = db[i].u_phone;
         db[i-1].u_point = db[i].u_point;
 //        printf("%d ",tran_record_array[i-1]);
         tran_record_array[i-1] = tran_record_array[i];
@@ -872,12 +986,133 @@ void Sorting_Deleting(int d_user_id){
 //    printf("U_count %d\n",user_count);
     db[user_count-1].u_point = 0;
     user_count--;
+    for(int i = 0 ; i < 3 ; i ++){
+        db[i].u_massage++;
+    }
+}
+void get_time(){
+    time_t tm;
+    time(&tm);
+
+    printf("Current time =%s\n", ctime(&tm));
+
+    FILE *fptr = fopen("myTime.txt","w");
+    fprintf(fptr,"%s", ctime(&tm));
+
+    fclose(fptr);
+
+    int index=0;
+    int time_space_counter=0;
+
+    Ctime[0].c_time[index]='_';
+    index++;
+
+    FILE *fptr2 = fopen("myTime.txt","r");
+    char c = fgetc(fptr2);
+
+    while (!feof(fptr2)){
+
+        if( c==' '){
+
+            time_space_counter++;
+
+            if(time_space_counter == 1){
+                Ctime[0].c_time[index]='!';
+                c = fgetc(fptr2);
+                index++;
+            } else if(time_space_counter==4){
+                Ctime[0].c_time[index]='@';
+                c = fgetc(fptr2);
+                index++;
+            } else{
+                Ctime[0].c_time[index]='_';
+                c = fgetc(fptr2);
+                index++;
+            }
+
+        } else{
+
+            Ctime[0].c_time[index]=c;
+            c = fgetc(fptr2);
+            index++;
+
+        }
+    }
+}
+int Counting(unsigned long long int Count){
+    int c = 0;
+    while(Count != 0){
+        Count /= 10;
+        c ++;
+    }
+    return c;
+
 }
 
-//void string_to_char_array(char test_A){
-//
-//}
+int phone_validation(unsigned long long int Ph) {
+    unsigned int standard = 959;
+    int C = Counting(Ph);
 
-//test with array pisi for dele data
-//ban function
-//all error check
+    if (C == 12) {
+        unsigned long long int first_three_digits = (Ph / 1000000000);
+        unsigned long long int ninth_digit = (Ph / 100000000) % 10;
+
+        if (first_three_digits == standard) {
+
+            if (ninth_digit == 4 || ninth_digit == 7 || ninth_digit == 9) {
+                printf("Valid\n");
+
+            } else {
+                printf("Not Valid\n");
+
+                return 0;
+            }
+
+        } else {
+            printf("Digits aren't valid:\n");
+            return 0;
+        }
+    }
+//9595010203
+    if (C == 10) {
+        unsigned long long int first_three_digit = (Ph / 10000000);
+        unsigned long long int seventh_digit = (Ph / 1000000) % 10;
+
+        if (first_three_digit == standard) {
+
+            if (seventh_digit == 5) {
+                printf("Valid\n");
+
+            } else {
+                printf("Not Valid\n");
+
+                return 0;
+            }
+
+        } else {
+            printf("Digits aren't valid:\n");
+            return 0;
+        }
+    }
+    if(C != 10 && C != 12){
+        printf("Your phone number is nonsense\n");
+        return 0;
+    }
+
+    int phone_counter = 0;
+    for (int i = 0; i < user_count; i++) {
+
+        if (Ph != db[i].u_phone) {
+
+            phone_counter++;
+        } else {
+            return phone_counter;
+            break;
+        }
+
+    }
+    if (phone_counter == user_count) {
+        return -1;
+    }
+return 0;
+}
